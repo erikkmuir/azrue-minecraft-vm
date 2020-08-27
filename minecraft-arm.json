@@ -2,6 +2,97 @@
 	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
 	"parameters": {
+
+		"minecraftUser": {
+			"type": "string",
+			"metadata": {
+				"description": "Your Minecraft user name"
+			}
+		},
+		"difficulty": {
+			"type": "string",
+			"defaultValue": "1",
+			"allowedValues": [
+				"0",
+				"1",
+				"2",
+				"3"
+			],
+			"metadata": {
+				"description": "0 - Peaceful, 1 - Easy, 2 - Normal, 3 - Hard"
+			}
+		},
+		"level-name": {
+			"type": "string",
+			"defaultValue": "world",
+			"metadata": {
+				"description": "Name of your world"
+			}
+		},
+		"gamemode": {
+			"type": "string",
+			"defaultValue": "0",
+			"allowedValues": [
+				"0",
+				"1",
+				"2",
+				"3"
+			],
+			"metadata": {
+				"description": "0 - Survival, 1 - Creative, 2 - Adventure, 3 - Spectator"
+			}
+		},
+		"white-list": {
+			"type": "string",
+			"defaultValue": "false",
+			"allowedValues": [
+				"false",
+				"true"
+			],
+			"metadata": {
+				"description": "Only ops and whitelisted players can connect"
+			}
+		},
+		"enable-command-block": {
+			"type": "string",
+			"defaultValue": "false",
+			"allowedValues": [
+				"false",
+				"true"
+			],
+			"metadata": {
+				"description": "enable command blocks"
+			}
+		},
+		"spawn-monsters": {
+			"type": "string",
+			"defaultValue": "true",
+			"allowedValues": [
+				"false",
+				"true"
+			],
+			"metadata": {
+				"description": "Enables monster spawning"
+			}
+		},
+		"generate-structures": {
+			"type": "string",
+			"defaultValue": "true",
+			"allowedValues": [
+				"false",
+				"true"
+			],
+			"metadata": {
+				"description": "Generates villages etc."
+			}
+		},
+		"level-seed": {
+			"type": "string",
+			"defaultValue": " ",
+			"metadata": {
+				"description": "Add a seed for your world"
+			}
+		},
 		"dnsNameForPublicIP": {
 			"defaultValue": "muirgang",
 			"type": "string",
@@ -31,25 +122,25 @@
 			]
 		},
 		"adminUsername": {
-		"type": "string",
-		"metadata": {
-		  "description": "Admin user name you will use to log on to the Virtual Machine."
+			"type": "string",
+			"metadata": {
+				"description": "Admin user name you will use to log on to the Virtual Machine."
+			}
+		},
+		"adminPasswordOrKey": {
+			"type": "securestring",
+			"metadata": {
+				"description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+			}
+		},
+		"authenticationType": {
+			"type": "string",
+			"defaultValue": "sshPublicKey",
+			"allowedValues": [
+				"sshPublicKey",
+				"password"
+			]
 		}
-	  },
-	  "adminPasswordOrKey": {
-		"type": "securestring",
-		"metadata": {
-		  "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
-		}
-	  },
-	   "authenticationType": {
-		"type": "string",
-		"defaultValue": "sshPublicKey",
-		"allowedValues": [
-		  "sshPublicKey",
-		  "password"
-		]
-	   }
 	},
 	"functions": [],
 	"variables": {
@@ -68,17 +159,17 @@
 		"subnetPrefix": "10.0.0.0/24",
 		"subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
 		"linuxConfiguration": {
-			"disablePasswordAuthentication" : true,
-			"ssh" : {
+			"disablePasswordAuthentication": true,
+			"ssh": {
 				"publicKey": [
 					{
-						"path":"[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
+						"path": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
 						"keyData": "[parameters('adminPasswordOrKey')]"
 					}
 				]
 			}
 		}
-		 
+
 	},
 	"resources": [
 		{
@@ -208,17 +299,17 @@
 				"osProfile": {
 					"computerName": "[variables('vmName')]",
 					"adminUsername": "[parameters('adminUsername')]",
-					"adminPassword":"[parameters('adminPasswordOrKey')]",
+					"adminPassword": "[parameters('adminPasswordOrKey')]",
 					"linuxConfiguration": "[if(equals(parameters('authenticationType'),'password'),json('null'),variables('linuxConfiguration'))]"
 				},
 				"storageProfile": {
 					"imageReference": {
 						"publisher": "[variables('imagePublisher')]",
-						"offer":"[variables('imageOffer')]",
+						"offer": "[variables('imageOffer')]",
 						"sku": "[variables('ubuntuOSVersion')]",
 						"version": "latest"
 					},
-					"osDisk" : {
+					"osDisk": {
 						"caching": "ReadWrite",
 						"createOption": "FromImage",
 						"diskSizeGB": "50"
@@ -227,7 +318,7 @@
 				"networkProfile": {
 					"networkInterfaces": [
 						{
-							"id":"[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+							"id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
 						}
 					]
 				}
@@ -249,9 +340,9 @@
 					"fileUris": [
 						"https://raw.githubusercontent.com/erikkmuir/azrue-minecraft-vm/create-vm/install-minecraft.sh"
 					],
-					"commandToExecute" : "[concat('bash install_minecraft.sh ', parameters('minecraftUser'), ' ', parameters('difficulty'), ' ', parameters('level-name'), ' ', parameters('gamemode'), ' ', parameters('white-list'), ' ', parameters('enable-command-block'), ' ', parameters('spawn-monsters'), ' ', parameters('generate-structures'), ' ', parameters('level-seed'))]"
+					"commandToExecute": "[concat('bash install_minecraft.sh ', parameters('minecraftUser'), ' ', parameters('difficulty'), ' ', parameters('level-name'), ' ', parameters('gamemode'), ' ', parameters('white-list'), ' ', parameters('enable-command-block'), ' ', parameters('spawn-monsters'), ' ', parameters('generate-structures'), ' ', parameters('level-seed'))]"
 				},
-				"protectedSettings": { }
+				"protectedSettings": {}
 			}
 		}
 	],
