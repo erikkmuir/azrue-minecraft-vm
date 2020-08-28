@@ -36,6 +36,12 @@ while ! echo y | apt-get update; do
     apt-get update
 done
 
+# Install JQ
+while ! echo y | apt-get install -y jq; do 
+	sleep 10
+	apt-get install -y jp
+done
+
 # Install Java12
 echo oracle-java14-installer shared/accepted-oracle-license-v1-2 select true | /usr/bin/debconf-set-selections
 
@@ -85,7 +91,7 @@ chmod +x /etc/systemd/system/minecraft-server.service
 # create a valid operators file using the Mojang API
 touch $minecraft_server_path/ops.json
 mojang_output="`wget -qO- $UUID_URL`"
-rawUUID=${mojang_output:7:32}
+rawUUID=$(echo $mojang_output | jq -r '.id')
 UUID=${rawUUID:0:8}-${rawUUID:8:4}-${rawUUID:12:4}-${rawUUID:16:4}-${rawUUID:20:12}
 printf '[\n {\n  \"uuid\":\"%s\",\n  \"name\":\"%s\",\n  \"level\":4\n }\n]' $UUID $1 >> $minecraft_server_path/ops.json
 chown $minecraft_user:$minecraft_group $minecraft_server_path/ops.json
