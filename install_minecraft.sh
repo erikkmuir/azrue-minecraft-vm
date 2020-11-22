@@ -44,8 +44,8 @@ done
 
 # Install Java12
 echo oracle-java14-installer shared/accepted-oracle-license-v1-2 select true | /usr/bin/debconf-set-selections
-
-while ! echo y | apt-get install -y oracle-java14-installer; do
+# removed oracle-java14-installer
+while ! echo y | apt-get install -y openjdk-11-jdk; do
     sleep 10
     apt-get install -y oracle-java14-installer
 done
